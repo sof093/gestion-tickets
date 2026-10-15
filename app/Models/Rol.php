@@ -11,7 +11,7 @@ class Rol extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'nombre_rol',
+        'nombre',       // Corregido para que coincida con tu SQL
         'descripcion',
     ];
 }

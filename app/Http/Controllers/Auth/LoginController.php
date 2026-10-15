@@ -46,7 +46,7 @@ class LoginController extends Controller
     $user->load('rol');
 
     // Validación por id_rol o nombre de rol
-    $nombreRol = strtolower($user->rol->nombre_rol ?? '');
+    $nombreRol = strtolower($user->rol->nombre ?? '');
 
     if ($user->id_rol == 1 || in_array($nombreRol, ['administrador', 'admin', 'soporte', 'tecnico'])) {
         return redirect()->intended('/admin/dashboard');
