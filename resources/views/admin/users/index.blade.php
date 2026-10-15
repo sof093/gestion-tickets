@@ -316,6 +316,36 @@
     .swal2-show { 
         animation: swal2-show .18s !important; 
     }
+
+    /* 1. Limitar el ancho máximo de SweetAlert2 globalmente */
+    .swal2-popup {
+        width: 90% !important;
+        max-width: 420px !important;
+    }
+
+    /* 2. Compactar el icono de SweetAlert2 */
+    .swal2-icon {
+        width: 44px !important;
+        height: 44px !important;
+        margin: 0.5rem auto 0.5rem !important;
+        border-width: 3px !important;
+    }
+    .swal2-icon .swal2-icon-content {
+        font-size: 1.4rem !important;
+    }
+
+    /* 3. Evitar animaciones lentas */
+    .swal2-show { 
+        animation: swal2-show .18s !important; 
+    }
+
+    /* 4. Forzar la separación entre botones de SweetAlert2 */
+    .swal2-actions {
+        gap: 1rem !important; /* Separación de 16px entre botones */
+    }
+    .swal2-actions button {
+        margin: 0 !important; /* Elimina márgenes antiguos de SweetAlert */
+    }
 </style>
 
 <script>
@@ -323,16 +353,16 @@
     // Mixin para alertas responsivas y compactas
     // ============================================================
     const SwalCompact = Swal.mixin({
-        buttonsStyling: false,
-        customClass: {
-            popup: 'rounded-2xl shadow-xl border border-slate-100 p-4',
-            title: 'text-sm font-bold text-slate-800 !p-0 !mb-2 text-center',
-            htmlContainer: 'text-xs text-slate-600 !m-0',
-            actions: '!flex !flex-col-reverse sm:!flex-row !gap-2 !mt-4 w-full justify-center',
-            confirmButton: 'w-full sm:w-auto rounded-lg px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer',
-            cancelButton: 'w-full sm:w-auto rounded-lg px-4 py-2 text-xs font-semibold text-white bg-slate-400 hover:bg-slate-500 transition-colors cursor-pointer'
-        }
-    });
+            buttonsStyling: false,
+            customClass: {
+                popup: 'rounded-2xl shadow-xl border border-slate-100 p-6',
+                title: 'text-base font-bold text-slate-800 !p-0 !mb-2 text-center',
+                htmlContainer: 'text-xs text-slate-600 !m-0 text-center',
+                actions: '!flex !flex-row items-center justify-center gap-5 !mt-5 w-full', // <-- Cambiamos gap-3 por gap-5
+                confirmButton: 'inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors cursor-pointer shadow-sm',
+                cancelButton: 'inline-flex items-center justify-center px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition-colors cursor-pointer'
+            }
+        });
 
     // Confirmación al cerrar modal con datos
     function confirmarCierreModal(component) {
@@ -350,23 +380,24 @@
 
     // Confirmación para eliminar usuario
     function confirmarEliminacion(id, nombre) {
-        SwalCompact.fire({
-            title: '¿Eliminar usuario?',
-            text: `¿Deseas eliminar a "${nombre}"?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            customClass: {
-                ...SwalCompact.customClass,
-                confirmButton: 'w-full sm:w-auto rounded-lg px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors cursor-pointer'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('delete-form-' + id).submit();
-            }
-        });
-    }
+            SwalCompact.fire({
+                title: '¿Eliminar usuario?',
+                text: `¿Deseas eliminar a "${nombre}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    ...SwalCompact.customClass,
+                    confirmButton: 'inline-flex items-center justify-center px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs transition-colors cursor-pointer shadow-sm',
+                    cancelButton: 'inline-flex items-center justify-center px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-200 transition-colors cursor-pointer'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
 
     // Alertas activadas por controladores de Laravel
     document.addEventListener("DOMContentLoaded", function() {
@@ -395,7 +426,7 @@
                 confirmButtonText: 'Entendido',
                 customClass: {
                     ...SwalCompact.customClass,
-                    confirmButton: 'w-full sm:w-auto rounded-lg px-4 py-2 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors cursor-pointer'
+                    confirmButton: 'rounded-lg px-5 py-2.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors cursor-pointer shadow-sm'
                 }
             });
         @endif

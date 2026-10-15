@@ -69,16 +69,19 @@
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between">
                             <label class="block text-xs font-bold text-[#0b1c30]" for="password">Contraseña</label>
-                            <button type="button" class="text-xs text-[#0059bb] font-medium hover:underline focus:outline-none" onclick="mostrarContactoSoporte()">
+                            
+                            <!-- Aquí está el cambio: -->
+                            <a href="{{ route('password.request') }}" class="text-xs text-[#0059bb] font-medium hover:underline focus:outline-none">
                                 ¿Olvidaste tu contraseña?
-                            </button>
+                            </a>
+
                         </div>
                         <div class="relative flex items-center rounded-lg bg-[#eff4ff] border border-transparent transition-all focus-within:border-[#0059bb] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0059bb]/20">
                             <div class="pl-3 text-gray-400 flex items-center pointer-events-none">
                                 <span class="material-symbols-outlined text-[20px]">lock</span>
                             </div>
                             <input class="w-full bg-transparent py-3 pl-2.5 pr-10 text-sm text-[#0b1c30] placeholder:text-gray-400 focus:outline-none" 
-                                   id="password" name="password" placeholder="••••••••••••" required type="password" autocomplete="current-password">
+                                id="password" name="password" placeholder="••••••••••••" required type="password" autocomplete="current-password">
                             <button type="button" class="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors flex items-center focus:outline-none" onclick="togglePasswordVisibility()">
                                 <span class="material-symbols-outlined text-[20px]" id="passwordEyeIcon">visibility</span>
                             </button>

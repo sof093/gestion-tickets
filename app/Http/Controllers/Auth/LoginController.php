@@ -42,18 +42,25 @@ class LoginController extends Controller
     }
 
     protected function redirectUser($user)
-{
-    $user->load('rol');
+    {
+        // 🚨 SI ES SU PRIMER LOGIN, LO INTERCEPTAMOS PRIMERO
+        if ($user->primer_login) {
+            return redirect()->route('password.primer_cambio.show');
+        }
 
-    // Validación por id_rol o nombre de rol
-    $nombreRol = strtolower($user->rol->nombre ?? '');
+        $user->load('rol');
 
-    if ($user->id_rol == 1 || in_array($nombreRol, ['administrador', 'admin', 'soporte', 'tecnico'])) {
-        return redirect()->intended('/admin/dashboard');
+        // Validación por id_rol o nombre de rol
+        $nombreRol = strtolower($user->rol->nombre ?? '');
+
+        if ($user->id_rol == 1 || in_array($nombreRol, ['administrador', 'admin', 'soporte', 'tecnico'])) {
+            return redirect()->intended('/admin/dashboard');
+        }
+
+        return redirect()->intended('/user/dashboard');
     }
 
-    return redirect()->intended('/user/dashboard');
-}
+    // 🚨 MÉTODO DE LOGOUT AGREGADO
     public function logout(Request $request)
     {
         Auth::logout();

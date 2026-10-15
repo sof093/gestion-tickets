@@ -25,16 +25,27 @@ class User extends Authenticatable
         'id_patio_descripcion',
         'id_departamento',
         'estatus',
+        'primer_login', // <--- Agregado aquí
     ];
 
     protected $hidden = [
         'contrasena_hash',
     ];
 
+    // Indicar a Laravel que use 'primer_login' como booleano (true/false)
+    protected $casts = [
+        'primer_login' => 'boolean',
+    ];
+
     // Mapeo de la contraseña personalizada para Laravel Auth
     public function getAuthPassword()
     {
         return $this->contrasena_hash;
+    }
+    // Indicar a Laravel que use la columna 'correo' para la recuperación de contraseña
+    public function getEmailForPasswordReset()
+    {
+        return $this->correo;
     }
 
     // ==========================================
@@ -57,5 +68,10 @@ class User extends Authenticatable
     public function departamento()
     {
         return $this->belongsTo(Departamento::class, 'id_departamento', 'id_departamento');
+    }
+    // Envía la notificación de restablecimiento de contraseña usando la columna 'correo'
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
     }
 }
