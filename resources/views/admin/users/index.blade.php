@@ -10,13 +10,38 @@
 <div class="flex flex-col w-full pb-6" 
      x-data="{ 
         openModal: false,
-        num_nomina: '{{ old('num_nomina') }}',
-        nombre_completo: '{{ old('nombre_completo') }}',
-        telefono: '{{ old('telefono') }}',
-        correo: '{{ old('correo') }}',
-        id_rol: '{{ old('id_rol') }}',
-        id_patio_descripcion: '{{ old('id_patio_descripcion') }}',
-        id_departamento: '{{ old('id_departamento') }}',
+        showConfirm: false,
+        openEditModal: false,
+        openViewModal: false,
+        
+        // Variables para Crear
+        num_nomina: @js(old('num_nomina', '')),
+        nombre_completo: @js(old('nombre_completo', '')),
+        telefono: @js(old('telefono', '')),
+        correo: @js(old('correo', '')),
+        id_rol: @js(old('id_rol', '')),
+        id_patio_descripcion: @js(old('id_patio_descripcion', '')),
+        id_departamento: @js(old('id_departamento', '')),
+        
+        // Variables para Editar
+        editId: null,
+        editNumNomina: '',
+        editNombre: '',
+        editNombreCompleto: '',
+        editTelefono: '',
+        editCorreo: '',
+        editIdRol: '',
+        editIdPatio: '',
+        editIdDepartamento: '',
+        
+        // Variables para Ver
+        viewNombre: '',
+        viewNomina: '',
+        viewCorreo: '',
+        viewTelefono: '',
+        viewPatio: '',
+        viewDepartamento: '',
+        viewRol: '',
         
         hasData() {
             return this.num_nomina.trim() !== '' || 
@@ -29,15 +54,24 @@
         },
 
         cerrarConConfirmacion() {
+            if (this.showConfirm) return;
             if (this.hasData()) {
+                this.showConfirm = true;
                 confirmarCierreModal(this);
             } else {
                 this.forceClose();
             }
         },
 
+        cerrarEditConConfirmacion() {
+            if (this.showConfirm) return;
+            this.showConfirm = true;
+            confirmarCierreEdicion(this);
+        },
+
         forceClose() {
             this.openModal = false;
+            this.showConfirm = false;
             this.num_nomina = '';
             this.nombre_completo = '';
             this.telefono = '';
@@ -45,8 +79,48 @@
             this.id_rol = '';
             this.id_patio_descripcion = '';
             this.id_departamento = '';
+        },
+
+        forceCloseEdit() {
+            this.openEditModal = false;
+            this.showConfirm = false;
+            this.editId = null;
+            this.editNumNomina = '';
+            this.editNombre = '';
+            this.editNombreCompleto = '';
+            this.editTelefono = '';
+            this.editCorreo = '';
+            this.editIdRol = '';
+            this.editIdPatio = '';
+            this.editIdDepartamento = '';
+        },
+
+        cargarDatosEdicion(user) {
+            this.editId = user.id_usuario;
+            this.editNumNomina = user.num_nomina;
+            this.editNombre = user.nombre_completo;
+            this.editNombreCompleto = user.nombre_completo;
+            this.editTelefono = user.telefono;
+            this.editCorreo = user.correo;
+            this.editIdRol = String(user.id_rol);
+            this.editIdPatio = user.patio?.nombre ?? '';
+            this.editIdDepartamento = user.departamento?.nombre ?? '';
+            this.openEditModal = true;
+        },
+
+        cargarDatosVer(user) {
+            this.viewNombre = user.nombre;
+            this.viewNomina = user.nomina;
+            this.viewCorreo = user.correo;
+            this.viewTelefono = user.telefono;
+            this.viewPatio = user.patio;
+            this.viewDepartamento = user.departamento;
+            this.viewRol = user.rol;
+            this.openViewModal = true;
         }
-     }">
+     }"
+     @abrir-editar.window="cargarDatosEdicion($event.detail)"
+     @abrir-ver.window="cargarDatosVer($event.detail)">
 
     <!-- Header Section -->
     <section class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-2 mb-6">
@@ -74,17 +148,35 @@
     </section>
 
     <!-- Filter Bar Section -->
-    <section class="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col gap-4 border border-slate-200">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-            <div class="md:col-span-6 relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-                <input class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-on-surface placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Buscar por Nombre, Nómina o Correo..." type="text">
-            </div>
-            <div class="md:col-span-6 flex justify-between md:justify-end items-center">
-                <span class="text-xs text-slate-500 font-semibold">Total registros: {{ $totalUsuarios ?? 0 }}</span>
-            </div>
+<!-- Filter Bar Section -->
+<!-- Filter Bar Section -->
+<section class="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col gap-4 border border-slate-200">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+        <div class="md:col-span-6 relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+
+            <input id="searchInput"
+                   name="search"
+                   value="{{ request('search') }}"
+                   oninput="buscarEnTiempoReal(this.value)"
+                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); }"
+                   autocomplete="off"
+                   class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-on-surface placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                   placeholder="Escribe para buscar por Nombre, Nómina o Correo..."
+                   type="text">
+
+            <button id="clearSearch"
+                    type="button"
+                    onclick="limpiarBusqueda()"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 font-bold text-xs {{ request('search') ? '' : 'hidden' }}"
+                    title="Limpiar búsqueda">✕</button>
         </div>
-    </section>
+
+        <div class="md:col-span-6 flex justify-between md:justify-end items-center gap-3">
+            <span class="text-xs text-slate-500 font-semibold">Total registros: <span id="totalRegistros">{{ $usuarios->total() }}</span></span>
+        </div>
+    </div>
+</section>
 
     <!-- Users Table Card -->
     <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col mb-6">
@@ -101,81 +193,23 @@
                         <th class="py-3 px-4 text-right">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
-                    @forelse($usuarios ?? [] as $user)
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="py-3.5 px-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 border border-primary/20">
-                                    {{ strtoupper(substr($user->nombre_completo ?? 'US', 0, 2)) }}
-                                </div>
-                                <div class="flex flex-col min-w-0">
-                                    <span class="font-bold text-slate-800 truncate">{{ $user->nombre_completo }}</span>
-                                    <span class="text-slate-500 text-[10px] sm:hidden">{{ $user->num_nomina }} • {{$user->correo ?? '' }}</span>
-                                    <span class="text-slate-500 truncate hidden sm:inline">Personal Operativo</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-3.5 px-4 hidden sm:table-cell">
-                            <span class="font-mono text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded">{{ $user->num_nomina }}</span>
-                        </td>
-                        <td class="py-3.5 px-4 text-slate-600 hidden md:table-cell">
-                            {{ $user->correo ?? 'No registrado' }}
-                        </td>
-                        <td class="py-3.5 px-4 hidden lg:table-cell">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] {{ $user->id_rol == 2 ? 'bg-indigo-900 text-indigo-100' : 'bg-slate-900 text-slate-100' }} font-semibold">
-                                {{ $user->id_rol == 1 ? 'Administrador' : 'Usuario' }}
-                            </span>
-                        </td>
-                        <td class="py-3.5 px-4 hidden lg:table-cell">
-                            <span>{{ $user->patio->nombre ?? ($user->id_patio_descripcion ?? 'General') }}</span>
-                        </td>
-                        <td class="py-3.5 px-4">
-                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] bg-emerald-50 text-emerald-700 font-bold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                                Activo
-                            </span>
-                        </td>
-                        <td class="py-3.5 px-4 text-right">
-                            <div class="inline-flex items-center justify-end gap-1">
-                                <button class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-600 hover:text-primary transition-colors inline-flex items-center" title="Editar Perfil">
-                                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                                </button>
-                                <form action="{{ route('admin.users.destroy', $user) }}" method="POST" id="delete-form-{{ $user->id_usuario }}">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" 
-                                            onclick="confirmarEliminacion('{{ $user->id_usuario }}', '{{ addslashes($user->nombre_completo) }}')" 
-                                            class="p-1.5 rounded-lg hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors inline-flex items-center cursor-pointer" 
-                                            title="Eliminar Usuario">
-                                        <span class="material-symbols-outlined text-[18px]">delete</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7" class="text-center py-10 text-slate-400">
-                            <span class="material-symbols-outlined text-4xl mb-1">group_off</span>
-                            <p class="text-sm font-medium">No hay usuarios registrados en la base de datos todavía.</p>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
+   <tbody id="usersTableBody" class="divide-y divide-slate-100 text-xs text-slate-700">
+    @include('admin.users.partials.table-rows', ['usuarios' => $usuarios])
+</tbody>
             </table>
         </div>
+        
     </section>
 
     <!-- ========================================================== -->
     <!-- MODAL: REGISTRAR NUEVO USUARIO                             -->
     <!-- ========================================================== -->
-    <div x-show="openModal" 
-         x-cloak
-         class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto">
-        
-        <div @click.away="cerrarConConfirmacion()" 
-             class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden transform transition-all my-auto">
+    <div x-show="openModal && !showConfirm" 
+     x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto">
+    
+    <div @click.away="!showConfirm && cerrarConConfirmacion()" 
+         class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden transform transition-all my-auto">
             
             <!-- Cabecera del Modal -->
             <div class="bg-slate-900 text-white px-4 sm:px-5 py-3.5 flex items-center justify-between shrink-0">
@@ -291,7 +325,72 @@
             </form>
         </div>
     </div>
+  @include('admin.users.partials.edit-modal')
+      <!-- MODAL: VER DETALLES -->
+    <div x-show="openViewModal && !showConfirm" x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4 overflow-y-auto">
+        <div @click.away="openViewModal = false" 
+             class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md flex flex-col overflow-hidden my-auto">
+            
+            <div class="bg-slate-800 text-white px-5 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[20px]">badge</span>
+                    <div>
+                        <h3 class="font-bold text-sm">Detalles del Usuario</h3>
+                        <p class="text-[10px] text-slate-300 uppercase tracking-wider">Solo lectura</p>
+                    </div>
+                </div>
+                <button @click="openViewModal = false" class="text-slate-300 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer" type="button">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
 
+            <div class="p-5 flex flex-col gap-3.5 text-xs">
+                <div class="flex flex-col border-b border-slate-100 pb-2">
+                    <span class="font-bold text-slate-400 text-[10px] uppercase mb-0.5">Nombre Completo</span>
+                    <span class="font-bold text-slate-800 text-sm" x-text="viewNombre"></span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col border-b border-slate-100 pb-2">
+                        <span class="font-bold text-slate-400 text-[10px] uppercase mb-0.5">Nómina</span>
+                        <span class="font-mono text-primary font-semibold" x-text="viewNomina"></span>
+                    </div>
+                    <div class="flex flex-col border-b border-slate-100 pb-2">
+                        <span class="font-bold text-slate-400 text-[10px] uppercase mb-0.5">Rol</span>
+                        <span class="font-semibold text-slate-800" x-text="viewRol"></span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col border-b border-slate-100 pb-2">
+                    <span class="font-bold text-slate-400 text-[10px] uppercase mb-0.5">Correo</span>
+                    <span class="text-slate-700" x-text="viewCorreo"></span>
+                </div>
+                
+                <div class="flex flex-col border-b border-slate-100 pb-2">
+                    <span class="font-bold text-slate-400 text-[10px] uppercase mb-0.5">Teléfono</span>
+                    <span class="font-mono text-slate-700">+52 <span x-text="viewTelefono"></span></span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col border-b border-slate-100 pb-2">
+                        <span class="font-bold text-slate-400 text-[10px] uppercase mb-0.5">Patio</span>
+                        <span class="text-slate-700" x-text="viewPatio"></span>
+                    </div>
+                    <div class="flex flex-col border-b border-slate-100 pb-2">
+                        <span class="font-bold text-slate-400 text-[10px] uppercase mb-0.5">Departamento</span>
+                        <span class="text-slate-700" x-text="viewDepartamento"></span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end pt-3 mt-1">
+                    <button type="button" @click="openViewModal = false" class="px-5 py-2 rounded-lg bg-slate-800 text-white font-semibold text-xs hover:bg-slate-700 transition-colors">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -365,19 +464,82 @@
         });
 
     // Confirmación al cerrar modal con datos
-    function confirmarCierreModal(component) {
+function confirmarCierreModal(component) {
+    SwalCompact.fire({
+        title: '¿Cerrar ventana?',
+        text: 'Se perderán los datos ingresados en el formulario.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cerrar',
+        cancelButtonText: 'Continuar editando',
+        // ⚠️ Estas dos opciones evitan que el click se propague
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    }).then((result) => {
+        // ⚠️ CLAVE: liberar la bandera SIEMPRE
+        component.showConfirm = false;
+
+        if (result.isConfirmed) {
+            component.forceClose();
+        }
+        // Si canceló, no hacemos nada → el modal sigue abierto
+    });
+}
+    // ============================================================
+    // Edición de usuario
+    // ============================================================
+    async function abrirModalEdicion(id) {
+        try {
+            const response = await fetch(`{{ url('admin/users') }}/${id}/edit`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) throw new Error('No se pudo cargar el usuario');
+
+            const user = await response.json();
+
+            // Obtenemos el componente de Alpine
+            const rootEl = document.querySelector('[x-data]');
+            const alpine = Alpine.$data(rootEl);
+
+            alpine.editId              = user.id_usuario;
+            alpine.editNumNomina       = user.num_nomina;
+            alpine.editNombre          = user.nombre_completo;
+            alpine.editNombreCompleto  = user.nombre_completo;
+            alpine.editTelefono        = user.telefono;
+            alpine.editCorreo          = user.correo;
+            alpine.editIdRol           = String(user.id_rol);
+            alpine.editIdPatio         = user.patio?.nombre ?? '';
+            alpine.editIdDepartamento  = user.departamento?.nombre ?? '';
+            alpine.openEditModal       = true;
+        } catch (err) {
+            console.error(err);
+            SwalCompact.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron cargar los datos del usuario.'
+            });
+        }
+    }
+
+    function confirmarCierreEdicion(component) {
         SwalCompact.fire({
-            title: '¿Cerrar ventana?',
-            text: 'Se perderán los datos ingresados en el formulario.',
+            title: '¿Cerrar sin guardar?',
+            text: 'Se perderán los cambios realizados.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, cerrar',
-            cancelButtonText: 'Continuar editando'
+            cancelButtonText: 'Continuar editando',
+            allowOutsideClick: false,
+            allowEscapeKey: false
         }).then((result) => {
-            if (result.isConfirmed) component.forceClose();
+            component.showConfirm = false;
+            if (result.isConfirmed) component.forceCloseEdit();
         });
     }
-
     // Confirmación para eliminar usuario
     function confirmarEliminacion(id, nombre) {
             SwalCompact.fire({
@@ -431,5 +593,113 @@
             });
         @endif
     });
+    // ============================================================
+    // Búsqueda en tiempo real con debounce
+    // ============================================================
+// ============================================================
+// Búsqueda en tiempo real con AJAX (sin recargar la página)
+// ============================================================
+let timeoutSearch = null;
+let abortController = null;
+
+async function buscarEnTiempoReal(value) {
+    clearTimeout(timeoutSearch);
+
+    const clearBtn = document.getElementById('clearSearch');
+    if (value.trim() !== '') clearBtn.classList.remove('hidden');
+    else clearBtn.classList.add('hidden');
+
+    timeoutSearch = setTimeout(async () => {
+        const tbody = document.getElementById('usersTableBody');
+        const total = document.getElementById('totalRegistros');
+
+        if (abortController) abortController.abort();
+        abortController = new AbortController();
+
+        tbody.style.opacity = '0.5';
+
+        try {
+            const url = new URL("{{ route('admin.users.index') }}", window.location.origin);
+            if (value.trim() !== '') url.searchParams.set('search', value);
+
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                signal: abortController.signal
+            });
+
+            if (!response.ok) throw new Error('Error en la búsqueda');
+
+            const data = await response.json();
+            tbody.innerHTML = data.html;
+            total.textContent = data.total;
+
+            window.history.replaceState({}, '', url.toString());
+        } catch (err) {
+            if (err.name !== 'AbortError') console.error(err);
+        } finally {
+            tbody.style.opacity = '1';
+        }
+    }, 350);
+}
+
+function limpiarBusqueda() {
+    const input = document.getElementById('searchInput');
+    input.value = '';
+    buscarEnTiempoReal('');
+    input.focus();
+}
+    function abrirModalVer(id, nombre, nomina, correo, telefono, patio, departamento, rol) {
+        const rootEl = document.querySelector('[x-data]');
+        const alpine = Alpine.$data(rootEl);
+
+        alpine.viewNombre       = nombre;
+        alpine.viewNomina       = nomina;
+        alpine.viewCorreo       = correo;
+        alpine.viewTelefono     = telefono;
+        alpine.viewPatio        = patio;
+        alpine.viewDepartamento = departamento;
+        alpine.viewRol          = rol;
+        alpine.openViewModal    = true;
+    }
+        // ============================================================
+    // Abrir Modal de Editar
+    // ============================================================
+    async function abrirModalEdicion(id) {
+        try {
+            const response = await fetch(`{{ url('admin/users') }}/${id}/edit`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) throw new Error('No se pudo cargar el usuario');
+
+            const user = await response.json();
+            
+            // Disparamos el evento que Alpine está escuchando
+            window.dispatchEvent(new CustomEvent('abrir-editar', { detail: user }));
+
+        } catch (err) {
+            console.error(err);
+            SwalCompact.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudieron cargar los datos del usuario.'
+            });
+        }
+    }
+
+    // ============================================================
+    // Abrir Modal de Ver
+    // ============================================================
+    function abrirModalVer(id, nombre, nomina, correo, telefono, patio, departamento, rol) {
+        window.dispatchEvent(new CustomEvent('abrir-ver', { 
+            detail: { id, nombre, nomina, correo, telefono, patio, departamento, rol } 
+        }));
+    }
 </script>
 @endsection

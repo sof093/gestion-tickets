@@ -14,12 +14,38 @@ use Illuminate\Support\Facades\Mail; // 👈 Importar la fachada Mail
 class UserController extends Controller
 {
     // 1. VER (Listar todos los usuarios)
-    public function index()
-    {
-        $usuarios = User::all();
-        $totalUsuarios = $usuarios->count();
-        return view('admin.users.index', compact('usuarios', 'totalUsuarios'));
+public function index(Request $request)
+{
+    $search = $request->input('search');
+
+    $usuarios = User::query()
+        ->when($search, function ($q) use ($search) {
+            $q->where(function ($q2) use ($search) {
+                $q2->where('nombre_completo', 'like', "%{$search}%")
+                   ->orWhere('num_nomina', 'like', "%{$search}%")
+                   ->orWhere('correo', 'like', "%{$search}%");
+            });
+        })
+        ->orderByDesc('id_usuario')
+        ->paginate(15)
+        ->withQueryString();
+
+    if ($request->ajax() || $request->wantsJson()) {
+        return response()->json([
+            'html'  => view('admin.users.partials.table-rows', compact('usuarios'))->render(),
+            'total' => $usuarios->total(),
+        ]);
     }
+
+    // Catálogos para el modal de edición
+    $roles         = \App\Models\Rol::orderBy('nombre')->get();
+    $patios        = \App\Models\Patio::orderBy('nombre')->get();
+    $departamentos = \App\Models\Departamento::orderBy('nombre')->get();
+
+    $totalUsuarios = $usuarios->total();
+
+    return view('admin.users.index', compact('usuarios', 'totalUsuarios', 'roles', 'patios', 'departamentos'));
+}
 
     // 2. CREAR (Guardar nuevo usuario y enviar credenciales por correo)
     public function store(Request $request)
@@ -81,29 +107,63 @@ class UserController extends Controller
         }
     }
 
-    // 3. EDITAR (Obtener datos para actualizar)
-    public function edit(User $user)
-    {
-        return response()->json($user);
-    }
+// 3. EDITAR (devolver datos del usuario en JSON)
+// 3. EDITAR (datos en JSON para el modal)
+public function edit(User $user)
+{
+    return response()->json([
+        'id_usuario'           => $user->id_usuario,
+        'num_nomina'           => $user->num_nomina,
+        'nombre_completo'      => $user->nombre_completo,
+        'telefono'             => $user->telefono,
+        'correo'               => $user->correo,
+        'id_rol'               => $user->id_rol,
+        'id_patio_descripcion' => $user->id_patio_descripcion,
+        'id_departamento'      => $user->id_departamento,
+        'estatus'              => $user->estatus,
+        'patio'                => $user->patio ? ['id_patio' => $user->patio->id_patio, 'nombre' => $user->patio->nombre] : null,
+        'departamento'         => $user->departamento ? ['id_departamento' => $user->departamento->id_departamento, 'nombre' => $user->departamento->nombre] : null,
+    ]);
+}
 
-    // 4. ACTUALIZAR (Modificar datos existentes)
-    public function update(Request $request, User $user)
-    {
-        $request->validate([
-            'nombre_completo' => 'required|string|max:150',
-            'correo' => 'required|email|unique:usuarios,correo,' . $user->id_usuario . ',id_usuario',
-            'id_rol' => 'required',
-            'id_patio_descripcion' => 'required',
-        ]);
+// 4. ACTUALIZAR
+public function update(Request $request, User $user)
+{
+    $request->validate([
+        'nombre_completo'      => ['required', 'string', 'max:150', 'regex:/^[A-Za-zÁÉÍÓÚÑáéíóúñ\s]+$/u'],
+        'telefono'             => 'required|digits:10',
+        'correo'               => 'required|email|unique:usuarios,correo,' . $user->id_usuario . ',id_usuario',
+        'id_rol'               => 'required|integer',
+        'id_patio_descripcion' => 'required',
+        'id_departamento'      => 'required',
+    ], [
+        'nombre_completo.regex' => 'El nombre completo solo debe contener letras, acentos y espacios.',
+        'telefono.digits'       => 'El teléfono debe tener exactamente 10 dígitos.',
+        'correo.email'          => 'Proporcione un correo válido con formato @.',
+    ]);
 
-        $data = $request->only(['nombre_completo', 'telefono', 'correo', 'id_rol', 'id_patio_descripcion', 'id_departamento']);
+    $patio = Patio::firstOrCreate(
+        ['nombre' => $request->id_patio_descripcion],
+        ['ciudad' => 'S/N']
+    );
 
-        $user->update($data);
+    $departamento = Departamento::firstOrCreate(
+        ['nombre' => $request->id_departamento],
+        ['segmento' => 'General']
+    );
 
-        return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado correctamente.');
-    }
+    $user->update([
+        'nombre_completo'      => $request->nombre_completo,
+        'telefono'             => $request->telefono,
+        'correo'               => $request->correo,
+        'id_rol'               => $request->id_rol,
+        'id_patio_descripcion' => $patio->id_patio,
+        'id_departamento'      => $departamento->id_departamento,
+    ]);
 
+    return redirect()->route('admin.users.index')
+        ->with('success', "Usuario <strong>{$user->nombre_completo}</strong> actualizado correctamente.");
+}
     // 5. ELIMINAR (Dar de baja o borrar de la BD)
     public function destroy(User $user)
     {
