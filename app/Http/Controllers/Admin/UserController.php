@@ -48,6 +48,7 @@ public function index(Request $request)
 }
 
     // 2. CREAR (Guardar nuevo usuario y enviar credenciales por correo)
+    // 2. CREAR (Guardar nuevo usuario y enviar credenciales por correo)
     public function store(Request $request)
     {
         // Validaciones estrictas solicitadas
@@ -66,16 +67,16 @@ public function index(Request $request)
             'correo.email' => 'Proporcione un correo institucional válido con formato @.',
         ]);
 
-        // Obtener o registrar automáticamente el Patio para asignarle su ID numérico correcto
+        // ✅ CORRECCIÓN: Buscamos el patio por su NOMBRE, si no existe lo crea con estatus activo
         $patio = Patio::firstOrCreate(
             ['nombre' => $request->id_patio_descripcion],
-            ['ciudad' => 'S/N']
+            ['ciudad' => 'S/N', 'estatus' => 'activo']
         );
 
-        // Obtener o registrar automáticamente el Departamento para asignarle su ID numérico correcto
+        // Buscamos el departamento por su NOMBRE, si no existe lo crea
         $departamento = Departamento::firstOrCreate(
             ['nombre' => $request->id_departamento],
-            ['segmento' => 'General']
+            ['segmento' => 'General', 'estatus' => 'activo']
         );
 
         // Generar contraseña temporal automática segura
@@ -106,7 +107,6 @@ public function index(Request $request)
                 ->with('success', "Usuario registrado, pero no se pudo enviar el correo. Contraseña temporal generada: <strong>{$passwordTemporal}</strong>");
         }
     }
-
 // 3. EDITAR (devolver datos del usuario en JSON)
 // 3. EDITAR (datos en JSON para el modal)
 public function edit(User $user)

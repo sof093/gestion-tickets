@@ -282,35 +282,66 @@
                     </select>
                 </div>
 
-                <!-- 6. Patio Operativo Asignado -->
-                <div class="flex flex-col gap-1">
-                    <label class="font-bold text-slate-700">6. Patio operativo asignado</label>
-                    <select name="id_patio_descripcion" x-model="id_patio_descripcion" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer">
-                        <option value="" disabled selected>Selecciona un patio...</option>
-                        <option value="TRANSDRIZA">TRANSDRIZA</option>
-                        <option value="TRANSLADO">TRANSLADO</option>
-                        <option value="CDMX">CDMX</option>
-                        <option value="SALTILLO">SALTILLO</option>
-                        <option value="LAZARO CARDENAS">LAZARO CARDENAS</option>
-                        <option value="SAN LUIS">SAN LUIS</option>
-                        <option value="VERACRUZ">VERACRUZ</option>
-                        <option value="QUERETARO">QUERETARO</option>
-                    </select>
-                </div>
+<!-- 6. Patio Operativo Asignado (CREAR) -->
+<div class="flex flex-col gap-1" x-data="{ 
+        open: false, 
+        selected: id_patio_descripcion, 
+        options: [ @foreach($patios as $patio) '{{ $patio->nombre }}', @endforeach ] 
+    }">
+    <label class="font-bold text-slate-700">6. Patio operativo asignado</label>
+    
+    <!-- Input oculto que envía el dato a Laravel -->
+    <input type="hidden" name="id_patio_descripcion" x-model="selected" required>
 
-                <!-- 7. Departamento -->
-                <div class="flex flex-col gap-1">
-                    <label class="font-bold text-slate-700">7. Departamento</label>
-                    <select name="id_departamento" x-model="id_departamento" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer">
-                        <option value="" disabled selected>Selecciona un departamento...</option>
-                        <option value="Gerencia - Juridico">Gerencia - Jurídico</option>
-                        <option value="Recursos humanos – Contabilidad y sistemas">Recursos humanos – Contabilidad y sistemas</option>
-                        <option value="Nominas - Medicina">Nóminas - Medicina</option>
-                        <option value="Taller – Seguridad e higiene">Taller – Seguridad e higiene</option>
-                        <option value="Compras - Calidad">Compras - Calidad</option>
-                        <option value="Almacen - Seguridad patrimonial – Servicios generales">Almacén - Seguridad patrimonial – Servicios generales</option>
-                    </select>
+    <!-- Botón que simula el Select -->
+    <div class="relative">
+        <button type="button" @click="open = !open" @click.away="open = false" 
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer">
+            <span x-text="selected ? selected : 'Selecciona un patio...'" :class="selected ? 'text-slate-800' : 'text-slate-400'"></span>
+            <span class="material-symbols-outlined text-slate-400 text-[16px] transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+        </button>
+
+        <!-- Lista desplegable con Tailwind -->
+        <div x-show="open" x-transition x-cloak 
+             class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+            <template x-for="option in options" :key="option">
+                <div @click="selected = option; open = false" 
+                     class="px-3 py-2 text-xs text-slate-700 hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors"
+                     x-text="option">
                 </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+<!-- 7. Departamento (CREAR) -->
+<div class="flex flex-col gap-1" x-data="{ 
+        open: false, 
+        selected: id_departamento, 
+        options: [ @foreach($departamentos as $depto) '{{ $depto->nombre }}', @endforeach ] 
+    }">
+    <label class="font-bold text-slate-700">7. Departamento</label>
+    
+    <input type="hidden" name="id_departamento" x-model="selected" required>
+
+    <div class="relative">
+        <button type="button" @click="open = !open" @click.away="open = false" 
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer">
+            <span x-text="selected ? selected : 'Selecciona un departamento...'" :class="selected ? 'text-slate-800' : 'text-slate-400'"></span>
+            <span class="material-symbols-outlined text-slate-400 text-[16px] transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+        </button>
+
+        <div x-show="open" x-transition x-cloak 
+             class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+            <template x-for="option in options" :key="option">
+                <div @click="selected = option; open = false" 
+                     class="px-3 py-2 text-xs text-slate-700 hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors"
+                     x-text="option">
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
 
                 <!-- Botones del Modal -->
                 <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2 shrink-0">

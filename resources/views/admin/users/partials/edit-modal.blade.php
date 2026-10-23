@@ -68,36 +68,97 @@
                     <option value="2">Administrador (Gestión total de accesos)</option>
                 </select>
             </div>
+<!-- Patio (EDITAR) -->
+<!-- Patio (EDITAR) -->
+<div class="flex flex-col gap-1" x-data="{ 
+        open: false, 
+        selected: editIdPatio, 
+        search: '',
+        options: [ @foreach($patios as $patio) '{{ $patio->nombre }}', @endforeach ],
+        get filteredOptions() {
+            if (this.search === '') return this.options;
+            return this.options.filter(opt => opt.toLowerCase().includes(this.search.toLowerCase()));
+        }
+    }" x-init="$watch('editIdPatio', value => selected = value)">
+    
+    <label class="font-bold text-slate-700">Patio operativo</label>
+    <input type="hidden" name="id_patio_descripcion" x-model="selected" required>
 
-            <!-- Patio -->
-            <div class="flex flex-col gap-1">
-                <label class="font-bold text-slate-700">Patio operativo</label>
-                <select name="id_patio_descripcion" x-model="editIdPatio" required
-                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    <option value="TRANSDRIZA">TRANSDRIZA</option>
-                    <option value="TRANSLADO">TRANSLADO</option>
-                    <option value="CDMX">CDMX</option>
-                    <option value="SALTILLO">SALTILLO</option>
-                    <option value="LAZARO CARDENAS">LAZARO CARDENAS</option>
-                    <option value="SAN LUIS">SAN LUIS</option>
-                    <option value="VERACRUZ">VERACRUZ</option>
-                    <option value="QUERETARO">QUERETARO</option>
-                </select>
+    <div class="relative">
+        <!-- El click.away va en el botón para que al abrir no se cierre, y el click.stop en el panel para que al escribir no se cierre -->
+        <button type="button" @click="open = !open" @click.away="open = false" 
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer">
+            <span x-text="selected ? selected : 'Selecciona un patio...'" :class="selected ? 'text-slate-800' : 'text-slate-400'"></span>
+            <span class="material-symbols-outlined text-slate-400 text-[16px] transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+        </button>
+
+        <!-- Agregamos @click.stop aquí para evitar que se cierre al hacer clic dentro -->
+        <div x-show="open" x-transition x-cloak @click.stop
+             class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg">
+            
+            <div class="p-2 border-b border-slate-100 bg-slate-50 rounded-t-lg">
+                <input type="text" x-model="search" placeholder="Buscar patio..." class="w-full px-2 py-1.5 text-xs bg-white border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary/50">
             </div>
 
-            <!-- Departamento -->
-            <div class="flex flex-col gap-1">
-                <label class="font-bold text-slate-700">Departamento</label>
-                <select name="id_departamento" x-model="editIdDepartamento" required
-                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    <option value="Gerencia - Juridico">Gerencia - Jurídico</option>
-                    <option value="Recursos humanos – Contabilidad y sistemas">Recursos humanos – Contabilidad y sistemas</option>
-                    <option value="Nominas - Medicina">Nóminas - Medicina</option>
-                    <option value="Taller – Seguridad e higiene">Taller – Seguridad e higiene</option>
-                    <option value="Compras - Calidad">Compras - Calidad</option>
-                    <option value="Almacen - Seguridad patrimonial – Servicios generales">Almacén - Seguridad patrimonial</option>
-                </select>
+            <div class="max-h-[110px] overflow-y-auto overscroll-contain">
+                <template x-for="option in filteredOptions" :key="option">
+                    <div @click="selected = option; open = false; search = ''" 
+                         class="px-3 py-2 text-xs text-slate-700 hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors"
+                         x-text="option">
+                    </div>
+                </template>
+                <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-xs text-slate-400 text-center">
+                    No se encontraron resultados
+                </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Departamento (EDITAR) -->
+<div class="flex flex-col gap-1 relative" x-data="{ 
+        open: false, 
+        selected: editIdDepartamento, 
+        search: '',
+        options: [ @foreach($departamentos as $depto) '{{ $depto->nombre }}', @endforeach ],
+        get filteredOptions() {
+            if (this.search === '') return this.options;
+            return this.options.filter(opt => opt.toLowerCase().includes(this.search.toLowerCase()));
+        }
+    }" x-init="$watch('editIdDepartamento', value => selected = value)">
+    
+    <label class="font-bold text-slate-700">Departamento</label>
+    <input type="hidden" name="id_departamento" x-model="selected" required>
+
+    <div class="relative w-full">
+        <button type="button" @click="open = !open" @click.away="open = false" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer">
+            <span x-text="selected ? selected : 'Selecciona un departamento...'" :class="selected ? 'text-slate-800' : 'text-slate-400'"></span>
+            <span class="material-symbols-outlined text-slate-400 text-[16px] transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+        </button>
+
+        <!-- DROPUP: Usamos 'bottom-full mb-1' en lugar de 'top-full mt-1' para que se abra hacia arriba -->
+        <div x-show="open" x-transition x-cloak @click.stop
+             class="absolute z-[999] left-0 right-0 bottom-full mb-1 bg-white border border-slate-200 rounded-lg shadow-xl">
+            
+            <div class="p-2 border-b border-slate-100 bg-slate-50 rounded-t-lg">
+                <input type="text" x-model="search" placeholder="Buscar departamento..." class="w-full px-2 py-1.5 text-xs bg-white border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-primary/50">
+            </div>
+
+            <!-- Forzamos el scroll interno limitando la altura -->
+            <div class="max-h-[110px] overflow-y-auto overscroll-contain">
+                <template x-for="option in filteredOptions" :key="option">
+                    <div @click="selected = option; open = false; search = ''" 
+                         class="px-3 py-2 text-xs text-slate-700 hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors" 
+                         x-text="option">
+                    </div>
+                </template>
+                <div x-show="filteredOptions.length === 0" class="px-3 py-2 text-xs text-slate-400 text-center">
+                    No se encontraron resultados
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
             <!-- Botones del Modal -->
             <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2 shrink-0">

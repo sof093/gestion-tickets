@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Panel de Control - Grupo TRACOMEX')</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,7 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         tailwind.config = {
@@ -91,7 +93,6 @@
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Tablero de control</span>
                 </a>
                 <!-- Gestión de Tickets -->
-                <!-- Cambiar href="#" por route('admin.tickets.index') -->
                 <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover text-sm font-medium transition-colors" href="{{ route('admin.tickets.index') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
                     <span class="material-symbols-outlined text-[20px]">confirmation_number</span>
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Gestión de Tickets</span>
@@ -102,7 +103,7 @@
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Usuarios</span>
                 </a>
                 <!-- Catálogos -->
-                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover text-sm font-medium transition-colors" href="#" :class="{ 'justify-center px-0': sidebarCollapsed }">
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover text-sm font-medium transition-colors" href="{{ route('admin.catalogos.index') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
                     <span class="material-symbols-outlined text-[20px]">warehouse</span>
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Catálogos</span>
                 </a>
@@ -188,5 +189,28 @@
         </footer>
     </div>
 
+    <!-- Script para las pestañas de catálogos (Movido aquí para evitar errores) -->
+    <script>
+        function cambiarTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            document.querySelectorAll('button[id^="btn-tab-"]').forEach(btn => {
+                btn.classList.remove('border-b-2', 'border-primary', 'text-primary', 'font-bold');
+                btn.classList.add('text-gray-500', 'hover:text-gray-700');
+            });
+            const content = document.getElementById('content-' + tabId);
+            if (content) {
+                content.classList.remove('hidden');
+                content.classList.add('block');
+            }
+            const btn = document.getElementById('btn-tab-' + tabId);
+            if (btn) {
+                btn.classList.remove('text-gray-500', 'hover:text-gray-700');
+                btn.classList.add('border-b-2', 'border-primary', 'text-primary', 'font-bold');
+            }
+        }
+    </script>
 </body>
 </html>

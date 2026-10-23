@@ -14,5 +14,13 @@ class Patio extends Model
     protected $fillable = [
         'nombre',
         'ciudad',
+        'tipo',    // <-- Agregado para que permita guardar el Tipo
+        'estatus', // <-- Agregado para que permita guardar el Estatus
     ];
+
+    // Relación con Usuarios (opcional, pero útil para después)
+    public function users()
+    {
+        return $this->hasMany(User::class, 'id_patio_descripcion', 'id_patio');
+    }
 }
