@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="vewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Panel de Control - Grupo TRACOMEX')</title>
     
@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -88,32 +88,49 @@
             <!-- Menú de navegación completo -->
             <nav class="flex flex-col gap-1 px-3 mt-4">
                 <!-- Tablero de control -->
-                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg bg-primary text-white font-semibold text-sm shadow-sm transition-all" href="{{ route('admin.dashboard') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors 
+                          {{ request()->routeIs('admin.dashboard') ? 'bg-primary text-white shadow-sm' : 'text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover' }}" 
+                   href="{{ route('admin.dashboard') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
                     <span class="material-symbols-outlined text-[20px]">dashboard</span>
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Tablero de control</span>
                 </a>
+
                 <!-- Gestión de Tickets -->
-                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover text-sm font-medium transition-colors" href="{{ route('admin.tickets.index') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors 
+                          {{ request()->routeIs('admin.tickets.*') ? 'bg-primary text-white shadow-sm' : 'text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover' }}" 
+                   href="{{ route('admin.tickets.index') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
                     <span class="material-symbols-outlined text-[20px]">confirmation_number</span>
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Gestión de Tickets</span>
                 </a>
+
                 <!-- Usuarios -->
-                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover text-sm font-medium transition-colors" href="{{ route('admin.users.index') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors 
+                          {{ request()->routeIs('admin.users.*') ? 'bg-primary text-white shadow-sm' : 'text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover' }}" 
+                   href="{{ route('admin.users.index') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
                     <span class="material-symbols-outlined text-[20px]">group</span>
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Usuarios</span>
                 </a>
+
                 <!-- Catálogos -->
-                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover text-sm font-medium transition-colors" href="{{ route('admin.catalogos.index') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors 
+                          {{ request()->routeIs('admin.catalogos.*') ? 'bg-primary text-white shadow-sm' : 'text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover' }}" 
+                   href="{{ route('admin.catalogos.index') }}" :class="{ 'justify-center px-0': sidebarCollapsed }">
                     <span class="material-symbols-outlined text-[20px]">warehouse</span>
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Catálogos</span>
                 </a>
+
                 <!-- Bitácora -->
-                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover text-sm font-medium transition-colors" href="#" :class="{ 'justify-center px-0': sidebarCollapsed }">
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors 
+                          {{ request()->routeIs('admin.bitacora.*') ? 'bg-primary text-white shadow-sm' : 'text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover' }}" 
+                   href="#" :class="{ 'justify-center px-0': sidebarCollapsed }">
                     <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Bitácora</span>
                 </a>
+
                 <!-- Reportes y Métricas -->
-                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover text-sm font-medium transition-colors" href="#" :class="{ 'justify-center px-0': sidebarCollapsed }">
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors 
+                          {{ request()->routeIs('admin.reportes.*') ? 'bg-primary text-white shadow-sm' : 'text-blue-100/75 hover:text-white hover:bg-tracomex-dark-hover' }}" 
+                   href="#" :class="{ 'justify-center px-0': sidebarCollapsed }">
                     <span class="material-symbols-outlined text-[20px]">monitoring</span>
                     <span x-show="!sidebarCollapsed" x-cloak class="whitespace-nowrap">Reportes y Métricas</span>
                 </a>
@@ -152,13 +169,19 @@
                     <span class="material-symbols-outlined text-[24px]">menu</span>
                 </button>
 
-                <!-- Buscador -->
-                <div class="relative w-48 sm:w-72 hidden sm:block">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">search</span>
-                    <input class="w-full pl-10 pr-4 py-2 bg-surface-subtle border border-surface-border rounded-lg text-sm text-on-surface placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all" placeholder="Buscar por Ticket..." type="text">
-                </div>
+                @if(!request()->routeIs('admin.tickets.show') && !request()->routeIs('admin.tickets.index'))
+            <div class="relative w-48 sm:w-72 hidden sm:block">
+                    <div class="relative w-48 sm:w-72 hidden sm:block">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[20px]">search</span>
+                        <input id="global-search-input" 
+                            class="w-full pl-10 pr-4 py-2 bg-surface-subtle border border-surface-border rounded-lg text-sm text-on-surface placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all" 
+                            placeholder="Buscar por Folio (ej. TK-2026-001)..." 
+                            type="text"
+                            autocomplete="off">
+                    </div>
+                @endif
             </div>
-
+            
             <!-- Usuario Activo -->
             <div class="flex items-center gap-4">
                 <div class="text-right hidden sm:block">
@@ -189,7 +212,7 @@
         </footer>
     </div>
 
-    <!-- Script para las pestañas de catálogos (Movido aquí para evitar errores) -->
+    <!-- Script para las pestañas de catálogos -->
     <script>
         function cambiarTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => {
@@ -211,6 +234,89 @@
                 btn.classList.add('border-b-2', 'border-primary', 'text-primary', 'font-bold');
             }
         }
+    </script>
+
+    <!-- Script para el Buscador Global AJAX -->
+    <!-- Script para el Buscador Global AJAX -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('global-search-input');
+            const tablaBody = document.querySelector('table tbody'); 
+
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); 
+                        const query = searchInput.value.trim();
+
+                        if(query === '') {
+                            // Si borran el input, recargamos para dejar la tabla normal
+                            window.location.reload(); 
+                            return;
+                        }
+
+                        // Si no estamos en el dashboard, redirigimos
+                        if (!tablaBody) {
+                            window.location.href = `{{ route('admin.tickets.index') }}?search=${query}`;
+                            return;
+                        }
+
+                        // Hacemos la petición AJAX
+                        fetch(`{{ route('admin.dashboard.search') }}?query=${query}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                // 1. Limpiamos resultados de búsquedas anteriores
+                                document.querySelectorAll('.fila-buscada').forEach(el => el.remove());
+
+                                if (data.tickets.length > 0) {
+                                    data.tickets.forEach(ticket => {
+                                        const tr = document.createElement('tr');
+                                        // Le ponemos una clase 'fila-buscada' para poder borrarla luego
+                                        tr.className = 'fila-buscada bg-yellow-50 border-l-4 border-yellow-400 transition-all duration-500'; 
+                                        
+                                        tr.innerHTML = `
+                                            <td class="px-6 py-4 font-mono font-bold text-primary">${ticket.folio}</td>
+                                            <td class="px-6 py-4 font-medium max-w-[200px] truncate">${ticket.descripcion}</td>
+                                            <td class="px-6 py-4 text-text-secondary">${ticket.patio ? ticket.patio.nombre : 'N/A'}</td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-red-100 text-red-700">
+                                                    ${ticket.prioridad ? ticket.prioridad.nombre : 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-blue-100 text-blue-700">
+                                                    ${ticket.estado ? ticket.estado.nombre : 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-text-secondary text-xs font-bold text-yellow-600">Encontrado</td>
+                                            <td class="px-6 py-4 text-right">
+                                                <a href="/admin/tickets/${ticket.id_ticket}" class="text-xs font-semibold text-primary hover:underline">Ver detalle</a>
+                                            </td>
+                                        `;
+                                        tablaBody.prepend(tr);
+                                    });
+
+                                    // Quitamos el resaltado amarillo después de 3 segundos (pero la fila se queda)
+                                    setTimeout(() => {
+                                        document.querySelectorAll('.bg-yellow-50').forEach(el => {
+                                            el.classList.remove('bg-yellow-50', 'border-l-4', 'border-yellow-400');
+                                        });
+                                    }, 3000);
+
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Ticket no encontrado',
+                                        text: 'Verifica el folio e intenta de nuevo.',
+                                        confirmButtonColor: '#0059bb'
+                                    });
+                                }
+                            })
+                            .catch(error => console.error('Error en la búsqueda:', error));
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

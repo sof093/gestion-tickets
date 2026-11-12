@@ -9,6 +9,22 @@ class Ticket extends Model
     protected $table = 'tickets';
     protected $primaryKey = 'id_ticket';
     public $timestamps = false;
+        protected $fillable = [
+        'folio',
+        'id_usuario',
+        'id_patio',
+        'id_categoria',
+        'id_subcat',
+        'id_falla', 
+        'id_marca', 
+        'id_prioridad',
+        'id_estado',
+        'id_tecnico',
+        'descripcion',
+        'fecha_creacion',
+        'fecha_asignacion',  // 🔥 AGREGA ESTO
+        'fecha_resolucion',
+    ];
 
     public function usuario()
     {
@@ -53,5 +69,14 @@ class Ticket extends Model
     public function comentarios()
     {
         return $this->hasMany(Comentario::class, 'id_ticket', 'id_ticket');
+    }
+        public function falla()
+    {
+        return $this->belongsTo(Falla::class, 'id_falla', 'id_falla');
+    }
+
+    public function marca()
+    {
+        return $this->belongsTo(Marca::class, 'id_marca', 'id_marca');
     }
 }

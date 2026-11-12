@@ -31,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Dashboard
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard/search', [App\Http\Controllers\Admin\DashboardController::class, 'searchTicket'])->name('admin.dashboard.search');
     
     // Gestión de Tickets
     Route::get('/admin/tickets', [TicketController::class, 'index'])->name('admin.tickets.index');
@@ -62,11 +63,60 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/admin/catalogos/departamentos/{id}', [CatalogoController::class, 'updateDepartamento'])->name('admin.catalogos.departamentos.update');
     Route::patch('/admin/catalogos/departamentos/{id}/status', [CatalogoController::class, 'toggleDepartamentoStatus'])->name('admin.catalogos.departamentos.status');
     Route::delete('/admin/catalogos/departamentos/{id}', [CatalogoController::class, 'destroyDepartamento'])->name('admin.catalogos.departamentos.destroy');
+
+        // Categorías
+    Route::post('/admin/catalogos/categorias', [CatalogoController::class, 'storeCategoria'])->name('admin.catalogos.categorias.store');
+    
+        // Subcategorías
+    Route::post('/admin/catalogos/subcategorias', [CatalogoController::class, 'storeSubcat'])->name('admin.catalogos.subcategorias.store');
+    Route::get('/admin/catalogos/subcategorias/{id}/edit', [CatalogoController::class, 'editSubcat'])->name('admin.catalogos.subcategorias.edit');    // <-- NUEVA
+    Route::put('/admin/catalogos/subcategorias/{id}', [CatalogoController::class, 'updateSubcat'])->name('admin.catalogos.subcategorias.update');     // <-- NUEVA
+    Route::delete('/admin/catalogos/subcategorias/{id}', [CatalogoController::class, 'destroySubcat'])->name('admin.catalogos.subcategorias.destroy');
+    // Fallas
+    Route::post('/admin/catalogos/fallas', [CatalogoController::class, 'storeFalla'])->name('admin.catalogos.fallas.store');
+    Route::delete('/admin/catalogos/fallas/{id}', [CatalogoController::class, 'destroyFalla'])->name('admin.catalogos.fallas.destroy');
+        // Marcas
+    Route::post('/admin/catalogos/marcas', [CatalogoController::class, 'storeMarca'])->name('admin.catalogos.marcas.store');
+    Route::delete('/admin/catalogos/marcas/{id}', [CatalogoController::class, 'destroyMarca'])->name('admin.catalogos.marcas.destroy');
+    Route::put('/admin/catalogos/prioridades/{id}', [CatalogoController::class, 'updatePrioridad'])->name('admin.catalogos.prioridades.update');
     // Cambio obligatorio de contraseña
     Route::get('/primer-cambio-password', [PrimerLoginController::class, 'show'])->name('password.primer_cambio.show');
     Route::put('/primer-cambio-password', [PrimerLoginController::class, 'update'])->name('password.primer_cambio.update');
 
-    Route::get('/user/dashboard', function () {
-        return "Portal del Usuario Operativo";
-    })->name('user.dashboard');
+    // ==========================================
+    // RUTAS DEL USUARIO (Portal Operativo)
+    // ==========================================
+    Route::prefix('user')->name('user.')->group(function () {
+        // 1. Dashboard
+        Route::get('/dashboard', function () {
+            return view('user.dashboard');
+        })->name('dashboard');
+
+        // 2. Mis Tickets
+        Route::get('/tickets', [TicketController::class, 'myTickets'])->name('tickets.index');
+
+        // 3. Crear Ticket (Formulario)
+        Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
+
+        // 4. Guardar Ticket
+        Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
+
+        // 5. Cerrar Ticket (Usuario valida solución)
+        Route::post('/tickets/{id}/close', [TicketController::class, 'closeTicket'])->name('tickets.close');
+                    // 6. Ver detalle de un ticket (Usuario)
+    Route::get('/tickets/{id}', [TicketController::class, 'showUserTicket'])->name('tickets.show');
+    });
+
+    // ==========================================
+    // RUTAS DEL ADMINISTRADOR (Tickets - Detalle)
+    // ==========================================
+    Route::get('/admin/tickets/{id}', [TicketController::class, 'show'])->name('admin.tickets.show');
+    Route::post('/admin/tickets/{id}/status', [TicketController::class, 'updateStatus'])->name('admin.tickets.status');
+    Route::post('/admin/tickets/{id}/comment', [TicketController::class, 'storeComment'])->name('admin.tickets.comment');
+
+
+
+    Route::post('/admin/tickets/{id}/assign', [TicketController::class, 'assignTecnico'])->name('admin.tickets.assign');
+    Route::get('/admin/tickets/data', [TicketController::class, 'getTicketsData'])->name('admin.tickets.data');
 });
+

@@ -11,7 +11,7 @@
         <div class="bg-surface-card p-4 rounded-xl border border-surface-border flex items-center justify-between shadow-xs">
             <div class="flex flex-col">
                 <span class="text-xs font-semibold text-text-secondary uppercase tracking-wider">TOTAL TICKETS ACTIVOS</span>
-                <span class="text-2xl font-bold text-on-surface mt-1">{{ $totalActivos ?? 0 }}</span>
+                <span id="total-activos-kpi" class="text-2xl font-bold text-on-surface mt-1">{{ $totalActivos ?? 0 }}</span>
             </div>
             <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
                 <span class="material-symbols-outlined text-[26px]">confirmation_number</span>
@@ -29,259 +29,293 @@
         </div>
     </div>
 
-    <!-- Cabecera de Página & Botón Nuevo Ticket -->
+    <!-- Cabecera de Página -->
     <div class="bg-surface-card rounded-xl p-5 border border-surface-border shadow-xs flex flex-col gap-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-xl font-bold text-on-surface tracking-tight">Gestión de tickets de soporte técnico</h1>
                 <p class="text-xs text-text-secondary mt-0.5">Control operativo, tiempos de SLA y atención en patios industriales</p>
             </div>
-            <div class="flex items-center gap-2">
-                <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary-container text-white text-sm font-semibold shadow-sm transition-colors active:scale-95">
-                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    <span>+ Nuevo Ticket</span>
-                </button>
-            </div>
         </div>
 
-        <!-- Barra de Filtros Multi-criterio -->
-        <div class="bg-surface-subtle/70 border border-surface-border rounded-lg p-3">
+        <!-- Barra de Filtros -->
+        <form id="filter-form" action="{{ route('admin.tickets.index') }}" method="GET" class="bg-surface-subtle/70 border border-surface-border rounded-lg p-3 flex flex-col gap-3">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-center">
-                <!-- Buscar texto -->
-                <div class="relative">
+                
+                <!-- 1. Buscador -->
+                <div class="relative lg:col-span-2">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-[18px]">search</span>
-                    <input class="w-full pl-9 pr-3 py-2 bg-surface-card border border-surface-border rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs" placeholder="Folio, título o solicitante..." type="text"/>
+                    <input id="search-input" name="search" value="{{ request('search') }}" 
+                           class="w-full pl-9 pr-3 py-2 bg-surface-card border border-surface-border rounded-lg text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs" 
+                           placeholder="Buscar por folio, título o solicitante..." type="text" />
                 </div>
-                <!-- Filtro Patio -->
+
+                <!-- 2. Filtro Patio -->
                 <div>
-                    <select class="w-full px-3 py-2 bg-surface-card border border-surface-border rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs cursor-pointer">
+                    <select name="patio_id" class="w-full px-3 py-2 bg-surface-card border border-surface-border rounded-lg text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs cursor-pointer">
                         <option value="">🏢 Todos los Patios</option>
-                        <option value="toluca">Patio Toluca</option>
-                        <option value="saltillo">Patio Saltillo</option>
-                        <option value="lazaro">Puerto Lázaro Cárdenas</option>
-                        <option value="veracruz">Patio Veracruz Santa Fe</option>
-                        <option value="slp">San Luis Potosí</option>
-                        <option value="aguascalientes">Aguascalientes</option>
+                        @foreach($patios as $patio)
+                            <option value="{{ $patio->id_patio }}" {{ request('patio_id') == $patio->id_patio ? 'selected' : '' }}>{{ $patio->nombre }}</option>
+                        @endforeach
                     </select>
                 </div>
-                <!-- Filtro Categoría -->
+
+                <!-- 3. Filtro Prioridad -->
                 <div>
-                    <select class="w-full px-3 py-2 bg-surface-card border border-surface-border rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs cursor-pointer">
-                        <option value="">🏷️ Todas las Categorías</option>
-                        <option value="zebra">Escáneres Zebra / VIN</option>
-                        <option value="redes">Redes &amp; Wi-Fi Industrial</option>
-                        <option value="erp">Software ERP Tracomex</option>
-                        <option value="basculas">Básculas y Sensores Rampa</option>
-                        <option value="sso">Cuentas y Accesos SSO</option>
-                    </select>
-                </div>
-                <!-- Filtro Prioridad -->
-                <div>
-                    <select class="w-full px-3 py-2 bg-surface-card border border-surface-border rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs cursor-pointer">
+                    <select name="prioridad_id" class="w-full px-3 py-2 bg-surface-card border border-surface-border rounded-lg text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs cursor-pointer">
                         <option value="">⚡ Prioridad: Todas</option>
-                        <option value="critica">Crítica</option>
-                        <option value="alta">Alta</option>
-                        <option value="media">Media</option>
-                        <option value="baja">Baja</option>
+                        @foreach($prioridades as $prio)
+                            <option value="{{ $prio->id_prioridad }}" {{ request('prioridad_id') == $prio->id_prioridad ? 'selected' : '' }}>{{ $prio->nombre }}</option>
+                        @endforeach
                     </select>
                 </div>
-                <!-- Filtro Estado -->
+
+                <!-- 4. Filtro Estado -->
                 <div>
-                    <select class="w-full px-3 py-2 bg-surface-card border border-surface-border rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs cursor-pointer">
+                    <select name="estado_id" class="w-full px-3 py-2 bg-surface-card border border-surface-border rounded-lg text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary shadow-2xs cursor-pointer">
                         <option value="">📌 Estado: Todos</option>
-                        <option value="nuevo">Nuevo</option>
-                        <option value="progreso">En Progreso</option>
-                        <option value="resuelto">Resuelto</option>
-                        <option value="cerrado">Cerrado</option>
+                        @foreach($estadosList as $est)
+                            <option value="{{ $est->id_estado }}" {{ request('estado_id') == $est->id_estado ? 'selected' : '' }}>{{ $est->nombre }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
-            <!-- Limpiar Filtros -->
-            <div class="mt-2.5 pt-2 border-t border-surface-border flex items-center justify-between text-xs">
-                <span class="text-text-secondary">Filtrado activo en tiempo real</span>
-                <button class="inline-flex items-center gap-1 text-text-secondary hover:text-accent-red font-medium transition-colors">
-                    <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
-                    <span>Limpiar Filtros</span>
-                </button>
+
+            <!-- Botones y Estado -->
+            <div class="flex items-center justify-between text-xs">
+                <span class="text-text-secondary flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">info</span>
+                    Los filtros se aplican automáticamente
+                </span>
+                
+                <div class="flex items-center gap-2">
+                    <button type="button" id="btn-limpiar" class="inline-flex items-center gap-1 text-text-secondary hover:text-accent-red font-medium transition-colors bg-white border border-surface-border px-3 py-1.5 rounded-lg shadow-sm">
+                        <span class="material-symbols-outlined text-[16px]">filter_alt_off</span> Limpiar filtros
+                    </button>
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 
-    <!-- Tablero Kanban de Tickets -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+    <!-- Tablero Kanban -->
+    <div id="kanban-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start transition-opacity duration-300">
+        @php
+            $estados = [
+                'Nuevo' => ['bg' => 'bg-primary', 'badge' => 'bg-blue-100 text-primary'],
+                'En Progreso' => ['bg' => 'bg-amber-500', 'badge' => 'bg-amber-100 text-amber-700'],
+                'Resuelto' => ['bg' => 'bg-emerald-500', 'badge' => 'bg-emerald-100 text-emerald-700'],
+                'Cerrado' => ['bg' => 'bg-slate-500', 'badge' => 'bg-slate-100 text-slate-700'],
+            ];
+        @endphp
 
-        <!-- ==================== COLUMNA: NUEVO ==================== -->
-        <div class="bg-surface-subtle rounded-xl p-3 border border-surface-border flex flex-col gap-3 min-h-[580px]">
-            <div class="flex items-center justify-between px-1 py-0.5">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-                    <span class="font-bold text-xs uppercase tracking-wide text-on-surface">NUEVO</span>
-                </div>
-                <span class="px-2 py-0.5 rounded-full bg-blue-100 text-primary font-bold text-xs">14</span>
-            </div>
-            <div class="flex flex-col gap-3">
-                <!-- Ticket 1 -->
-                <div class="bg-surface-card rounded-lg p-3.5 border border-surface-border shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-red"></div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="font-mono text-xs font-bold text-primary">TK-2025-092</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-accent-red">CRÍTICA</span>
-                    </div>
-                    <h3 class="font-bold text-sm text-on-surface leading-snug mb-2 group-hover:text-primary transition-colors">Falla en lector de código VIN en rampa 3</h3>
-                    <div class="space-y-1 mb-3 text-xs text-text-secondary">
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[15px]">location_on</span>
-                            <span class="truncate">Patio Toluca • Rampa 03</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[15px]">person</span>
-                            <span class="truncate">Ing. Héctor Valdés (Madrinas)</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[15px]">schedule</span>
-                            <span>Hace 18 min</span>
-                        </div>
-                    </div>
-                    <div class="pt-2 border-t border-surface-border flex items-center justify-between">
-                        <span class="inline-flex items-center gap-1 text-[11px] text-text-secondary font-medium">
-                            <span class="material-symbols-outlined text-[14px]">person_off</span> Sin asignar
-                        </span>
-                        <button class="px-2.5 py-1 rounded bg-surface-subtle text-primary hover:bg-primary hover:text-white transition-colors text-xs font-semibold flex items-center gap-1">
-                            <span>Ver detalle</span>
-                            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        @foreach($estados as $estadoNombre => $color)
+            @php
+                $ticketsDelEstado = $ticketsPorEstado->get($estadoNombre, collect());
+            @endphp
 
-        <!-- ==================== COLUMNA: EN PROGRESO ==================== -->
-        <div class="bg-surface-subtle rounded-xl p-3 border border-surface-border flex flex-col gap-3 min-h-[580px]">
-            <div class="flex items-center justify-between px-1 py-0.5">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-accent-teal"></span>
-                    <span class="font-bold text-xs uppercase tracking-wide text-on-surface">EN PROGRESO</span>
+            <div class="bg-surface-subtle rounded-xl p-3 border border-surface-border flex flex-col gap-3 min-h-[580px]">
+                <div class="flex items-center justify-between px-1 py-0.5">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full {{ $color['bg'] }}"></span>
+                        <span class="font-bold text-xs uppercase tracking-wide text-on-surface">{{ $estadoNombre }}</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full {{ $color['badge'] }} font-bold text-xs">{{ $ticketsDelEstado->count() }}</span>
                 </div>
-                <span class="px-2 py-0.5 rounded-full bg-sky-100 text-accent-teal font-bold text-xs">28</span>
-            </div>
-            <div class="flex flex-col gap-3">
-                <!-- Ticket 1 -->
-                <div class="bg-surface-card rounded-lg p-3.5 border border-surface-border shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-accent-red"></div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="font-mono text-xs font-bold text-primary">TK-2025-084</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-accent-red">CRÍTICA</span>
-                    </div>
-                    <h3 class="font-bold text-sm text-on-surface leading-snug mb-2 group-hover:text-primary transition-colors">Descalibración en báscula de pesaje de ejes Madrinas</h3>
-                    <div class="space-y-1 mb-2 text-xs text-text-secondary">
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[15px]">location_on</span>
-                            <span class="truncate">Puerto Lázaro Cárdenas</span>
+                
+                <div class="flex flex-col gap-3">
+                    @forelse($ticketsDelEstado as $ticket)
+                        <div class="bg-surface-card rounded-lg p-3.5 border border-surface-border shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 
+                                @if($ticket->prioridad->nombre == 'CRÍTICA') bg-red-600 
+                                @elseif($ticket->prioridad->nombre == 'ALTA') bg-amber-500 
+                                @elseif($ticket->prioridad->nombre == 'MEDIA') bg-blue-500 
+                                @else bg-gray-400 @endif">
+                            </div>
+                            
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="font-mono text-xs font-bold text-primary">{{ $ticket->folio }}</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase 
+                                    @if($ticket->prioridad->nombre == 'CRÍTICA') bg-red-100 text-accent-red 
+                                    @elseif($ticket->prioridad->nombre == 'ALTA') bg-amber-100 text-amber-700 
+                                    @elseif($ticket->prioridad->nombre == 'MEDIA') bg-blue-100 text-blue-700 
+                                    @else bg-gray-100 text-gray-700 @endif">
+                                    {{ $ticket->prioridad->nombre }}
+                                </span>
+                            </div>
+                            
+                            <h3 class="font-bold text-sm text-on-surface leading-snug mb-2 group-hover:text-primary transition-colors">
+                                {{ Str::limit($ticket->descripcion, 60) }}
+                            </h3>
+                            
+                            <div class="space-y-1 mb-3 text-xs text-text-secondary">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[15px]">location_on</span>
+                                    <span class="truncate">{{ $ticket->patio->nombre ?? 'Sin Patio' }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[15px]">person</span>
+                                    <span class="truncate">{{ $ticket->usuario->nombre_completo ?? 'Sin usuario' }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="material-symbols-outlined text-[15px]">schedule</span>
+                                    <span>{{ \Carbon\Carbon::parse($ticket->fecha_creacion)->diffForHumans() }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-2 border-t border-surface-border flex items-center justify-between">
+                                <span class="inline-flex items-center gap-1 text-[11px] text-text-secondary font-medium">
+                                    <span class="material-symbols-outlined text-[14px]">category</span> 
+                                    {{ $ticket->categoria->nombre ?? 'Sin cat' }}
+                                </span>
+                                <a href="{{ route('admin.tickets.show', $ticket->id_ticket) }}" class="px-2.5 py-1 rounded bg-surface-subtle text-primary hover:bg-primary hover:text-white transition-colors text-xs font-semibold flex items-center gap-1">
+                                    <span>Ver detalle</span>
+                                    <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                </a>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[15px]">person</span>
-                            <span class="truncate">Manuel Arredondo</span>
+                    @empty
+                        <div class="text-center py-8 text-xs text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                            No hay tickets en este estado.
                         </div>
-                    </div>
-                    <div class="mb-3 bg-surface-subtle p-2 rounded border border-surface-border">
-                        <div class="flex items-center justify-between text-[11px] mb-1">
-                            <span class="text-text-secondary font-medium">SLA Restante</span>
-                            <span class="font-bold text-accent-red">45m de 2h</span>
-                        </div>
-                        <div class="w-full bg-surface-border rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-accent-red h-full rounded-full" style="width: 72%;"></div>
-                        </div>
-                    </div>
-                    <div class="pt-2 border-t border-surface-border flex items-center justify-between">
-                        <div class="flex items-center gap-1.5">
-                            <div class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">CM</div>
-                            <span class="text-xs font-medium text-on-surface truncate max-w-[80px]">C. Mendoza</span>
-                        </div>
-                        <button class="px-2.5 py-1 rounded bg-surface-subtle text-primary hover:bg-primary hover:text-white transition-colors text-xs font-semibold flex items-center gap-1">
-                            <span>Ver detalle</span>
-                            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== COLUMNA: RESUELTO ==================== -->
-        <div class="bg-surface-subtle rounded-xl p-3 border border-surface-border flex flex-col gap-3 min-h-[580px]">
-            <div class="flex items-center justify-between px-1 py-0.5">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-green-600"></span>
-                    <span class="font-bold text-xs uppercase tracking-wide text-on-surface">RESUELTO</span>
-                </div>
-                <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-bold text-xs">65</span>
-            </div>
-            <div class="flex flex-col gap-3">
-                <!-- Ticket 1 -->
-                <div class="bg-surface-card rounded-lg p-3.5 border border-surface-border shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-green-600"></div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="font-mono text-xs font-bold text-primary">TK-2025-065</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-green-100 text-green-700">RESUELTO</span>
-                    </div>
-                    <h3 class="font-bold text-sm text-on-surface leading-snug mb-2 group-hover:text-primary transition-colors">Actualización de firmware antena RFID en caseta salida</h3>
-                    <div class="space-y-1 mb-3 text-xs text-text-secondary">
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[15px]">location_on</span>
-                            <span class="truncate">Aguascalientes • Salida 01</span>
-                        </div>
-                        <div class="flex items-center gap-1.5 text-green-700 font-medium">
-                            <span class="material-symbols-outlined text-[15px]">task_alt</span>
-                            <span class="truncate">Validado por Ing. Bernal</span>
-                        </div>
-                    </div>
-                    <div class="pt-2 border-t border-surface-border flex items-center justify-between">
-                        <div class="flex items-center gap-1.5">
-                            <div class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-[10px] font-bold">FB</div>
-                            <span class="text-xs font-medium text-on-surface truncate max-w-[80px]">F. Bernal</span>
-                        </div>
-                        <button class="px-2.5 py-1 rounded bg-surface-subtle text-primary hover:bg-primary hover:text-white transition-colors text-xs font-semibold flex items-center gap-1">
-                            <span>Ver detalle</span>
-                            <span class="material-symbols-outlined text-[14px]">chevron_right</span>
-                        </button>
-                    </div>
+                    @endforelse
                 </div>
             </div>
-        </div>
-
-        <!-- ==================== COLUMNA: CERRADO ==================== -->
-        <div class="bg-surface-subtle rounded-xl p-3 border border-surface-border flex flex-col gap-3 min-h-[580px]">
-            <div class="flex items-center justify-between px-1 py-0.5">
-                <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-gray-500"></span>
-                    <span class="font-bold text-xs uppercase tracking-wide text-on-surface">CERRADO</span>
-                </div>
-                <span class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-bold text-xs">182</span>
-            </div>
-            <div class="flex flex-col gap-3">
-                <!-- Ticket 1 -->
-                <div class="bg-surface-card/80 rounded-lg p-3.5 border border-surface-border shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-gray-400"></div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="font-mono text-xs font-bold text-text-secondary">TK-2025-045</span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-700">CERRADO</span>
-                    </div>
-                    <h3 class="font-bold text-sm text-on-surface leading-snug mb-2">Instalación punto de red en caseta de pesaje</h3>
-                    <div class="space-y-1 mb-3 text-xs text-text-secondary">
-                        <div class="flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[15px]">location_on</span>
-                            <span class="truncate">Patio Toluca</span>
-                        </div>
-                    </div>
-                    <div class="pt-2 border-t border-surface-border flex items-center justify-between">
-                        <span class="text-xs text-text-secondary">Archivado</span>
-                        <button class="px-2.5 py-1 rounded bg-surface-subtle text-text-secondary hover:bg-slate-200 transition-colors text-xs font-semibold flex items-center gap-1">
-                            <span>Ver historial</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        @endforeach
     </div>
 </div>
+
+<!-- SCRIPT AJAX PARA FILTRADO SIN RECARGA -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('filter-form');
+    const searchInput = document.getElementById('search-input');
+    const kanbanContainer = document.getElementById('kanban-container');
+    const kpiActivos = document.getElementById('total-activos-kpi');
+    const btnLimpiar = document.getElementById('btn-limpiar');
+    
+    // Función que hace la petición AJAX
+    function fetchTickets() {
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData).toString();
+
+        kanbanContainer.style.opacity = '0.5';
+
+        fetch(`${form.action}?${params}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest' 
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            kpiActivos.innerText = data.totalActivos;
+            renderKanban(data.ticketsPorEstado);
+            kanbanContainer.style.opacity = '1';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            kanbanContainer.style.opacity = '1';
+        });
+    }
+
+    // Escuchar Enter en el buscador
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            fetchTickets();
+        }
+    });
+
+    // Escuchar cambios en los Selects
+    form.querySelectorAll('select').forEach(select => {
+        select.addEventListener('change', function() {
+            fetchTickets();
+        });
+    });
+
+    // NUEVO: Escuchar el botón de Limpiar Filtros
+    btnLimpiar.addEventListener('click', function() {
+        // 1. Limpiamos el texto del buscador
+        searchInput.value = '';
+        
+        // 2. Reiniciamos los selects a su primera opción (value="")
+        form.querySelectorAll('select').forEach(select => {
+            select.value = '';
+        });
+
+        // 3. Volvemos a hacer la petición para traer todo
+        fetchTickets();
+    });
+
+    // Función para pintar el Kanban
+    function renderKanban(ticketsPorEstado) {
+        const estados = {
+            'Nuevo': { bg: 'bg-primary', badge: 'bg-blue-100 text-primary' },
+            'En Progreso': { bg: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
+            'Resuelto': { bg: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
+            'Cerrado': { bg: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700' }
+        };
+
+        kanbanContainer.innerHTML = ''; 
+
+        Object.keys(estados).forEach(estadoNombre => {
+            const color = estados[estadoNombre];
+            const tickets = ticketsPorEstado[estadoNombre] || [];
+
+            const columna = document.createElement('div');
+            columna.className = 'bg-surface-subtle rounded-xl p-3 border border-surface-border flex flex-col gap-3 min-h-[580px]';
+            
+            let htmlTickets = '';
+
+            if (tickets.length === 0) {
+                htmlTickets = `<div class="text-center py-8 text-xs text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">No hay tickets en este estado.</div>`;
+            } else {
+                tickets.forEach(ticket => {
+                    let colorPrioridad = 'bg-gray-400';
+                    let textPrioridad = 'bg-gray-100 text-gray-700';
+                    if (ticket.prioridad?.nombre === 'CRÍTICA') { colorPrioridad = 'bg-red-600'; textPrioridad = 'bg-red-100 text-accent-red'; }
+                    else if (ticket.prioridad?.nombre === 'ALTA') { colorPrioridad = 'bg-amber-500'; textPrioridad = 'bg-amber-100 text-amber-700'; }
+                    else if (ticket.prioridad?.nombre === 'MEDIA') { colorPrioridad = 'bg-blue-500'; textPrioridad = 'bg-blue-100 text-blue-700'; }
+
+                    htmlTickets += `
+                        <div class="bg-surface-card rounded-lg p-3.5 border border-surface-border shadow-xs relative overflow-hidden group hover:shadow-md transition-shadow">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 ${colorPrioridad}"></div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="font-mono text-xs font-bold text-primary">${ticket.folio}</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${textPrioridad}">${ticket.prioridad?.nombre || 'N/A'}</span>
+                            </div>
+                            <h3 class="font-bold text-sm text-on-surface leading-snug mb-2 group-hover:text-primary transition-colors">
+                                ${ticket.descripcion.length > 60 ? ticket.descripcion.substring(0, 60) + '...' : ticket.descripcion}
+                            </h3>
+                            <div class="space-y-1 mb-3 text-xs text-text-secondary">
+                                <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">location_on</span><span class="truncate">${ticket.patio?.nombre || 'Sin Patio'}</span></div>
+                                <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">person</span><span class="truncate">${ticket.usuario?.nombre_completo || 'Sin usuario'}</span></div>
+                                <div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px]">schedule</span><span>${new Date(ticket.fecha_creacion).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</span></div>
+                            </div>
+                            <div class="pt-2 border-t border-surface-border flex items-center justify-between">
+                                <span class="inline-flex items-center gap-1 text-[11px] text-text-secondary font-medium"><span class="material-symbols-outlined text-[14px]">category</span> ${ticket.categoria?.nombre || 'Sin cat'}</span>
+                                <a href="/admin/tickets/${ticket.id_ticket}" class="px-2.5 py-1 rounded bg-surface-subtle text-primary hover:bg-primary hover:text-white transition-colors text-xs font-semibold flex items-center gap-1">
+                                    <span>Ver detalle</span><span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            columna.innerHTML = `
+                <div class="flex items-center justify-between px-1 py-0.5">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full ${color.bg}"></span>
+                        <span class="font-bold text-xs uppercase tracking-wide text-on-surface">${estadoNombre}</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full ${color.badge} font-bold text-xs">${tickets.length}</span>
+                </div>
+                <div class="flex flex-col gap-3">${htmlTickets}</div>
+            `;
+
+            kanbanContainer.appendChild(columna);
+        });
+    }
+});
+</script>
 @endsection

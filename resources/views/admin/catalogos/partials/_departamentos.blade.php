@@ -14,6 +14,7 @@
                     <th class="py-3 px-4 font-bold">Código / ID</th>
                     <th class="py-3 px-4 font-bold">Nombre del Departamento</th>
                     <th class="py-3 px-4 font-bold">Segmento</th>
+                    <th class="py-3 px-4 font-bold">Impacto</th>
                     <th class="py-3 px-4 font-bold text-center">Estatus</th>
                     <th class="py-3 px-4 font-bold text-right">Acciones</th>
                 </tr>
@@ -28,6 +29,17 @@
                         </td>
                         <td class="py-3 px-4"><span class="font-semibold text-on-surface block">{{ $depto->nombre }}</span></td>
                         <td class="py-3 px-4 text-gray-600 text-sm">{{ $depto->segmento ?? 'General' }}</td>
+                        <td class="py-3 px-4 text-center">
+                            @if($depto->nivel_impacto == 1)
+                                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800">CRÍTICO</span>
+                            @elseif($depto->nivel_impacto == 2)
+                                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">ALTO</span>
+                            @elseif($depto->nivel_impacto == 3)
+                                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">MEDIO</span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700">BAJO</span>
+                            @endif
+                        </td>
                         <!-- 🔥 ID único en el contenedor del estatus -->
                         <td class="py-3 px-4 text-center" id="estatus-depto-{{ $depto->id_departamento }}">
                             @if($depto->estatus === 'activo')
@@ -65,9 +77,9 @@
     <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         <div class="bg-tracomex-dark text-white p-5 flex items-center justify-between">
             <h3 class="text-lg font-bold" id="depto-modal-title">Agregar Departamento</h3>
-            <button onclick="closeModalDepto()" class="text-white hover:text-red-400"><span class="material-symbols-outlined">close</span></button>
+            <button onclick="confirmarCierreDepto()" class="text-white hover:text-red-400"><span class="material-symbols-outlined">close</span></button>
         </div>
-        <form id="depto-form" action="{{ route('admin.catalogos.departamentos.store') }}" method="POST" class="p-6 flex flex-col gap-4">
+                <form id="depto-form" action="{{ route('admin.catalogos.departamentos.store') }}" method="POST" class="p-6 flex flex-col gap-4">
             @csrf
             <div class="flex flex-col gap-1.5">
                 <label class="font-bold text-sm text-slate-700">Nombre del Departamento *</label>
@@ -77,8 +89,42 @@
                 <label class="font-bold text-sm text-slate-700">Segmento</label>
                 <input name="segmento" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg" placeholder="Ej. General">
             </div>
+            
+            <!-- 🔥 AQUÍ VA EL PASO 2 (El select del Impacto) 🔥 -->
+            <div class="flex flex-col gap-1.5" x-data="{ 
+                    open: false, 
+                    selected: '4', 
+                    options: [
+                        { val: '1', label: 'Crítico (Gerencia)' }, 
+                        { val: '2', label: 'Alto (RH, Nóminas)' }, 
+                        { val: '3', label: 'Medio (Compras, Taller)' }, 
+                        { val: '4', label: 'Bajo (Almacén, Servicios)' }
+                    ]
+                }" x-init="$watch('selected', value => document.getElementById('edit_nivel_impacto').value = value)">
+                <label class="font-bold text-sm text-slate-700">Nivel de Impacto *</label>
+                <input type="hidden" name="nivel_impacto" id="edit_nivel_impacto" x-model="selected" required>
+                
+                <div class="relative">
+                    <button type="button" @click="open = !open" @click.away="open = false" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer">
+                        <span x-text="options.find(o => o.val === selected)?.label || 'Selecciona...'"></span>
+                        <span class="material-symbols-outlined text-gray-400 text-[16px] transition-transform" :class="open ? 'rotate-180' : ''">expand_more</span>
+                    </button>
+
+                <div x-show="open" x-transition x-cloak @click.stop 
+                    class="absolute z-[999] left-0 right-0 bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-40 overflow-y-auto">
+                    <template x-for="option in options" :key="option.val">
+                        <div @click="selected = option.val; open = false" 
+                            class="px-3 py-2 text-sm text-gray-700 hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors" 
+                            x-text="option.label">
+                        </div>
+                    </template>
+                </div>
+                </div>
+            </div>
+                        <!-- 🔥 FIN DEL PASO 2 🔥 -->
+
             <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onclick="closeModalDepto()" class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">Cancelar</button>
+                <button type="button" onclick="confirmarCierreDepto()" class="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">Cancelar</button>
                 <button type="submit" class="bg-primary text-white px-5 py-2 rounded-lg hover:bg-blue-700">Guardar</button>
             </div>
         </form>
@@ -119,6 +165,7 @@
             form.querySelector('input[name="nombre"]').value = data.nombre;
             form.querySelector('input[name="segmento"]').value = data.segmento;
             
+            document.getElementById('edit_nivel_impacto').value = data.nivel_impacto || 4;
             document.getElementById('depto-modal-title').innerText = 'Editar Departamento';
             
             form.dataset.method = 'PUT';
@@ -271,6 +318,22 @@
                 } catch (error) {
                     Swal.fire('Error', 'No se pudo cambiar el estatus.', 'error');
                 }
+            }
+        });
+    }
+        function confirmarCierreDepto() {
+        Swal.fire({
+            title: '¿Cerrar sin guardar?',
+            text: 'Los cambios realizados se perderán.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cerrar',
+            cancelButtonText: 'Continuar editando',
+            confirmButtonColor: '#ba1a1a',
+            cancelButtonColor: '#49607e'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                closeModalDepto();
             }
         });
     }

@@ -1,3 +1,5 @@
+<!-- index.blade.php -->
+
 @extends('components.layouts.admin')
 
 @section('title', 'Gestión de Usuarios - Grupo TRACOMEX')
@@ -275,10 +277,10 @@
                 <!-- 5. Rol -->
                 <div class="flex flex-col gap-1">
                     <label class="font-bold text-slate-700">5. Rol de Privilegios en el Sistema</label>
-                    <select name="id_rol" x-model="id_rol" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer">
+                    <select name="id_rol" x-model="id_rol" required class="...">
                         <option value="" disabled selected>Selecciona un rol de acceso...</option>
-                        <option value="1">Usuario (Operativo / Colaborador estándar)</option>
-                        <option value="2">Administrador (Gestión total de accesos y configuración)</option>
+                        <option value="1">Administrador (Gestión total de accesos y configuración)</option>
+                        <option value="2">Usuario (Operativo / Colaborador estándar)</option>
                     </select>
                 </div>
 

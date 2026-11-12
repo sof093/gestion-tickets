@@ -14,6 +14,7 @@ class Departamento extends Model
     protected $fillable = [
         'nombre',
         'segmento',
+        'nivel_impacto',
         'estatus', // <-- Agregado para que permita guardar el Estatus
-    ];
+        ];
 }

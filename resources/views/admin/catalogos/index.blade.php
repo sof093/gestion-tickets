@@ -16,6 +16,8 @@
             <button onclick="mostrarSeccion('departamentos')" id="btn-departamentos" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-all">Departamentos</button>
             <button onclick="mostrarSeccion('categorias')" id="btn-categorias" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-all">Categorías</button>
             <button onclick="mostrarSeccion('prioridades')" id="btn-prioridades" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-all">Prioridades</button>
+            <button onclick="mostrarSeccion('estados')" id="btn-estados" class="px-4 py-2 text-gray-500 hover:text-gray-700 transition-all">Estados</button>
+        
         </div>
     </div>
 
@@ -36,6 +38,10 @@
         @include('admin.catalogos.partials._prioridades')
     </div>
 
+    <div id="sec-estados" class="hidden">
+    @include('admin.catalogos.partials._estados')
+    </div>
+
 </div>
 
 <!-- SCRIPT INFALIBLE -->
@@ -47,12 +53,13 @@
         document.getElementById('sec-departamentos').classList.add('hidden');
         document.getElementById('sec-categorias').classList.add('hidden');
         document.getElementById('sec-prioridades').classList.add('hidden');
+        document.getElementById('sec-estados').classList.add('hidden');
 
         // 2. Mostrar la seleccionada
         document.getElementById('sec-' + nombre).classList.remove('hidden');
 
         // 3. Resetear estilos de todos los botones
-        const botones = ['patios', 'departamentos', 'categorias', 'prioridades'];
+        const botones = ['patios', 'departamentos', 'categorias', 'prioridades', 'estados'];
         botones.forEach(b => {
             const btn = document.getElementById('btn-' + b);
             btn.classList.remove('border-b-2', 'border-primary', 'text-primary', 'font-bold');
@@ -75,7 +82,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const tabGuardada = urlParams.get('tab');
         
-        if (tabGuardada && ['patios', 'departamentos', 'categorias', 'prioridades'].includes(tabGuardada)) {
+        if (tabGuardada && ['patios', 'departamentos', 'categorias', 'prioridades', 'estados'].includes(tabGuardada)) {
             mostrarSeccion(tabGuardada);
         }
     });

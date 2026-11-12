@@ -1,3 +1,4 @@
+<!-- table-rows.php -->
 @forelse($usuarios ?? [] as $user)
     <tr class="hover:bg-slate-50/80 transition-colors">
         <td class="py-3.5 px-4">

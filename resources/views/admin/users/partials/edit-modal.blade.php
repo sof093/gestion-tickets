@@ -1,3 +1,4 @@
+<!-- edit-modal.blade.php -->
 <div x-show="openEditModal && !showConfirm" 
      x-cloak
      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-2 sm:p-4 overflow-y-auto">
@@ -62,10 +63,9 @@
             <!-- Rol -->
             <div class="flex flex-col gap-1">
                 <label class="font-bold text-slate-700">Rol en el sistema</label>
-                <select name="id_rol" x-model="editIdRol" required
-                        class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20">
-                    <option value="1">Usuario (Operativo / Colaborador estándar)</option>
-                    <option value="2">Administrador (Gestión total de accesos)</option>
+                <select name="id_rol" x-model="editIdRol" required class="...">
+                    <option value="1">Administrador (Gestión total de accesos y configuración)</option>
+                    <option value="2">Usuario (Operativo / Colaborador estándar)</option>
                 </select>
             </div>
 <!-- Patio (EDITAR) -->

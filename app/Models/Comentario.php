@@ -10,11 +10,15 @@ class Comentario extends Model
     protected $primaryKey = 'id_comentario';
     public $timestamps = false;
 
-    public function ticket()
-    {
-        return $this->belongsTo(Ticket::class, 'id_ticket', 'id_ticket');
-    }
+    // 🔥 ESTA ES LA PARTE QUE FALTA O ESTÁ MAL
+    protected $fillable = [
+        'id_ticket',
+        'id_usuario',
+        'mensaje',
+        'fecha'
+    ];
 
+    // Relación con el usuario que escribió el comentario
     public function usuario()
     {
         return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
