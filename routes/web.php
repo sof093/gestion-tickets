@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CatalogoController; // Importamos el controlador de catálogos
 use App\Http\Controllers\Auth\PrimerLoginController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 
@@ -87,13 +88,12 @@ Route::middleware(['auth'])->group(function () {
     // RUTAS DEL USUARIO (Portal Operativo)
     // ==========================================
     Route::prefix('user')->name('user.')->group(function () {
-        // 1. Dashboard
-        Route::get('/dashboard', function () {
-            return view('user.dashboard');
-        })->name('dashboard');
+        // 1. Dashboard (AQUÍ ESTÁ EL CAMBIO)
+        Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
 
         // 2. Mis Tickets
         Route::get('/tickets', [TicketController::class, 'myTickets'])->name('tickets.index');
+
 
         // 3. Crear Ticket (Formulario)
         Route::get('/tickets/create', [TicketController::class, 'create'])->name('tickets.create');
@@ -105,6 +105,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tickets/{id}/close', [TicketController::class, 'closeTicket'])->name('tickets.close');
                     // 6. Ver detalle de un ticket (Usuario)
     Route::get('/tickets/{id}', [TicketController::class, 'showUserTicket'])->name('tickets.show');
+            // 7. Perfil del Usuario
+        Route::get('/profile', [\App\Http\Controllers\User\ProfileController::class, 'index'])->name('profile');
     });
 
     // ==========================================

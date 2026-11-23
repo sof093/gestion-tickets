@@ -69,10 +69,10 @@
                     <span class="material-symbols-outlined text-[20px]">add_circle</span>
                     <span>Crear Ticket</span>
                 </a>
-                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg {{ request()->routeIs('user.profile') ? 'bg-primary text-white font-semibold shadow-sm' : 'text-slate-600 hover:text-primary hover:bg-slate-100 font-medium' }} text-sm transition-colors" href="#">
-                    <span class="material-symbols-outlined text-[20px]">person</span>
-                    <span>Mi Perfil</span>
-                </a>
+                <a class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg {{ request()->routeIs('user.profile') ? 'bg-primary text-white font-semibold shadow-sm' : 'text-slate-600 hover:text-primary hover:bg-slate-100 font-medium' }} text-sm transition-colors" href="{{ route('user.profile') }}">
+    <span class="material-symbols-outlined text-[20px]">person</span>
+    <span>Mi Perfil</span>
+</a>
             </nav>
         </div>
 
